@@ -1,3 +1,6 @@
+# Local database
+database.db
+
 # Editors
 .vscode/
 
