@@ -89,7 +89,7 @@ export default function Modal({ data }) {
       const resp = await api.post(`v1/users/`, body);
       console.log(resp);
       if (resp.status === 201) {
-        toast.success("Criado!");
+        toast.success("Cadastrado!");
       } else {
         toast.error("Erro!");
       }
