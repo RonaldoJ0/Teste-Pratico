@@ -125,7 +125,7 @@ async def update_user(
             ],
         )
     user_ident = await crud.user.get_by_ident_doc(db=db, ident_doc=user_in.ident_doc)
-    if user_ident:
+    if user_ident and user.id != user_ident.id:
         raise HTTPException(
             status_code=409,
             detail=[{"msg": "O documento de identificação ja esta em uso."}],
