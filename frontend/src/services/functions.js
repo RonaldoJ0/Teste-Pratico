@@ -29,6 +29,12 @@ export function telAddMask(value) {
   return aux;
 }
 
+export function cepAddMask(value) {
+  let aux = value.replace(/[^0-9]/g, "");
+  aux = aux.replace(/^(\d{5})(\d)/g, "$1-$2");
+  return aux;
+}
+
 export function RemoveMask(value) {
   return value?.replace(/[^0-9]/g, "");
 }
