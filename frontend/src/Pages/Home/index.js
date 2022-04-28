@@ -34,6 +34,7 @@ function Tabela() {
             onClick={() => {
               setOpen(true);
               setDataUser(null);
+              setAltera({});
             }}
           >
             Cadastrar

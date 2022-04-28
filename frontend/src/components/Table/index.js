@@ -3,9 +3,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-// import { PropTypes } from 'prop-types';
 import { ModalContext } from "../../provider";
 import api from "../../services/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DataTable({ data, func }) {
   const { setOpen, dataUser, setDataUser } = React.useContext(ModalContext);
@@ -101,17 +102,17 @@ export default function DataTable({ data, func }) {
     {
       field: "street",
       headerName: "Rua",
-      width: 130,
+      width: 190,
     },
     {
       field: "district",
       headerName: "Bairro",
-      width: 100,
+      width: 130,
     },
     {
       field: "city",
       headerName: "Cidade",
-      width: 100,
+      width: 130,
     },
     {
       field: "state",
@@ -154,6 +155,11 @@ export default function DataTable({ data, func }) {
                 try {
                   const resp = await api.delete(`v1/users/${row.id}`);
                   console.log(resp.data);
+                  if (resp.status === 200) {
+                    toast.success("Deletado!");
+                  } else {
+                    toast.error("Erro!");
+                  }
                   const array = dataUser.filter(
                     (element) => element.id !== row.id
                   );
@@ -172,13 +178,14 @@ export default function DataTable({ data, func }) {
   ];
 
   return (
-    <div style={{ marginLeft: "1rem", height: 500, width: "100%" }}>
+    <div style={{ marginLeft: "1rem", height: 640, width: "100%" }}>
+      <ToastContainer />
       {rows && (
         <DataGrid
           rows={rows}
           columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Box, Button } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -12,11 +12,13 @@ import {
   RemoveMask,
   ValidateBlanksSpace,
   CpfCnpjMask,
+  cepAddMask,
 } from "../../services/functions";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 export default function Modal({ data }) {
-  //   console.log("modal", data.id);
   const { open, setOpen, handleGet } = useContext(ModalContext);
   const [dadoUser, setDadoUser] = useState({
     name: data.name,
@@ -42,21 +44,37 @@ export default function Modal({ data }) {
     siafi: null,
   });
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    setEnder({
+      cep: null,
+      logradouro: null,
+      complemento: null,
+      bairro: null,
+      localidade: null,
+      uf: null,
+      ibge: null,
+      gia: null,
+      ddd: null,
+      siafi: null,
+    });
+  }, [data]);
+
   async function handleEndereco(cep) {
     try {
       const resp = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+      if (resp.data.erro) {
+        toast.error("CEP não encontrado!");
+      }
       console.log(resp);
       setEnder(resp.data);
     } catch (error) {
       console.error(error);
     }
   }
-
-  const handleClose = () => {
-    setOpen(false);
-    // window.location.reload();
-    // window.location.reload();
-  };
 
   async function handlePost() {
     try {
@@ -70,38 +88,45 @@ export default function Modal({ data }) {
       };
       const resp = await api.post(`v1/users/`, body);
       console.log(resp);
+      if (resp.status === 201) {
+        toast.success("Criado!");
+      } else {
+        toast.error("Erro!");
+      }
       handleGet();
     } catch (error) {
       console.error(error);
     }
     setOpen(false);
-    // window.location.reload();
   }
 
   async function handlePut() {
-    delete dadoUser.ident_doc;
+    // delete dadoUser.ident_doc;
     try {
       const resp = await api.put(`v1/users/${data.id}`, dadoUser);
+      if (resp.status === 200) {
+        toast.success("Alterado!");
+      } else {
+        toast.error("Erro!");
+      }
       console.log(resp);
       handleGet();
     } catch (error) {
       console.error(error);
     }
     setOpen(false);
-    // window.location.reload();
   }
 
   function getForm(id, value) {
     setDadoUser({ ...dadoUser, [id]: value });
   }
 
-  //   console.log(data);
-
   return (
     <>
       {data && (
         <Dialog open={open} onClose={handleClose}>
           <Box component="form" autoComplete="off">
+            <ToastContainer />
             <DialogTitle>Cadastrar</DialogTitle>
             <DialogContent>
               <TextField
@@ -125,7 +150,7 @@ export default function Modal({ data }) {
                 type="tel"
                 fullWidth
                 variant="outlined"
-                defaultValue={data.phone}
+                defaultValue={telAddMask(data.phone || "")}
                 onChange={(e) => {
                   ValidateBlanksSpace(e.target.value, e.target);
                   e.target.value = telAddMask(e.target.value);
@@ -141,7 +166,7 @@ export default function Modal({ data }) {
                 type="text"
                 fullWidth
                 variant="outlined"
-                defaultValue={data.ident_doc}
+                defaultValue={CpfCnpjMask(data.ident_doc || "")}
                 onChange={(e) => {
                   ValidateBlanksSpace(e.target.value, e.target);
                   e.target.value = CpfCnpjMask(e.target.value);
@@ -157,18 +182,21 @@ export default function Modal({ data }) {
                 type="text"
                 fullWidth
                 variant="outlined"
-                defaultValue={data.zip_code}
+                defaultValue={cepAddMask(data.zip_code || "")}
                 onChange={(e) => {
-                  getForm(e.target.id, e.target.value);
-                  if (e.target.value.length === 8) {
+                  ValidateBlanksSpace(e.target.value, e.target);
+                  e.target.value = cepAddMask(e.target.value);
+                  getForm(e.target.id, RemoveMask(e.target.value));
+                  if (e.target.value.length === 9) {
                     e.target.blur();
                   }
                 }}
                 onBlur={(e) => {
-                  if (e.target.value.length === 8) {
+                  if (e.target.value.length === 9) {
                     handleEndereco(RemoveMask(e.target.value));
                   }
                 }}
+                inputProps={{ maxLength: 9 }}
               />
               {ender.logradouro && (
                 <>
@@ -182,7 +210,7 @@ export default function Modal({ data }) {
                     InputProps={{
                       readOnly: true,
                     }}
-                    variant="outlined"
+                    variant="filled"
                     onChange={(e) => {
                       getForm(e.target.id, e.target.value);
                     }}
@@ -197,7 +225,7 @@ export default function Modal({ data }) {
                     InputProps={{
                       readOnly: true,
                     }}
-                    variant="outlined"
+                    variant="filled"
                     onChange={(e) => {
                       getForm(e.target.id, e.target.value);
                     }}
@@ -212,7 +240,7 @@ export default function Modal({ data }) {
                     InputProps={{
                       readOnly: true,
                     }}
-                    variant="outlined"
+                    variant="filled"
                     onChange={(e) => {
                       console.log("O alerta entrou aqui");
                       getForm(e.target.id, e.target.value);
@@ -228,7 +256,7 @@ export default function Modal({ data }) {
                     InputProps={{
                       readOnly: true,
                     }}
-                    variant="outlined"
+                    variant="filled"
                     onChange={(e) => {
                       getForm(e.target.id, e.target.value);
                     }}
@@ -243,7 +271,7 @@ export default function Modal({ data }) {
                     InputProps={{
                       readOnly: true,
                     }}
-                    variant="outlined"
+                    variant="filled"
                     onChange={(e) => {
                       getForm(e.target.id, e.target.value);
                     }}
