@@ -1,15 +1,28 @@
-import React, { createContext, useState} from "react";
+import React, { createContext, useState } from "react";
+import api from "../services/api";
 
-const ModalContext = createContext()
+const ModalContext = createContext();
 
-function ModalProvider({ children }){
-    const [open, setOpen] = useState(false);
+function ModalProvider({ children }) {
+  const [open, setOpen] = useState(false);
+  const [dataUser, setDataUser] = useState(null);
 
-    return (
-        <ModalContext.Provider value={{ open, setOpen }}>
-            {children}
-        </ModalContext.Provider>
-    )
+  async function handleGet() {
+    try {
+      const resp = await api.get("v1/users/?skip=0&limit=100");
+      setDataUser(resp.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  return (
+    <ModalContext.Provider
+      value={{ open, setOpen, dataUser, setDataUser, handleGet }}
+    >
+      {children}
+    </ModalContext.Provider>
+  );
 }
 
-export {ModalContext, ModalProvider}
+export { ModalContext, ModalProvider };
