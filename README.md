@@ -94,8 +94,6 @@ npm start
 
 The [MIT License]() (MIT)
 
-Copyright :copyright: 2020 - Spotenu
-
 <br>
 
 ## Canais de comunicação
